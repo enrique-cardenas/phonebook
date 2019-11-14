@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
+import People from './components/People'
+import peopleService from './services/people' 
 
 const App = () => {
 
-  const [persons, setPersons] = useState([])
+  const [ people, setPeople] = useState([])
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => { 
-        setPersons(response.data)
+    peopleService
+      .getAll()
+      .then(initialPeople => {
+        setPeople(initialPeople)
       })
   }, [])
 
-  const personsToShow = persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+  const peopleToShow = people.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
   
   const addPerson = (event) => {
     event.preventDefault()
@@ -28,15 +28,16 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-    if(persons.findIndex(person => person.name === newName) !== -1){
+    if(people.findIndex(person => person.name === newName) !== -1){
       alert(`${newName} is already added to phonebook`)
     }
     else{
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      axios
-        .post('http://localhost:3001/persons', personObject)
-        .then(response => console.log(response.data))
+      peopleService
+        .create(personObject)
+        .then(data => {
+          setPeople(people.concat(personObject))
+          setNewName('')
+        })
     }
   }
 
@@ -59,7 +60,7 @@ const App = () => {
       <h2>add a new</h2>
       <PersonForm addPerson={addPerson} newName={newName} handlePersonChange={handlePersonChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow}/>
+      <People peopleToShow={peopleToShow}/>
     </div>
   )
 }
