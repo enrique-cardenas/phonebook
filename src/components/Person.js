@@ -1,12 +1,12 @@
 import React from 'react'
+import Button from './Button'
 
-const Person = ({person}) => {
+const Person = ({person, removePerson}) => {
   return(
-    <>
-      <p key={person.name}>
-          {`${person.name} ${person.number}`}
-      </p>
-    </>
+    <div>
+      {`${person.name} ${person.number}`} 
+      <Button text='delete' onClick={removePerson(person.id)}/>
+    </div>
   )
 }
 
