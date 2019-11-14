@@ -42,8 +42,11 @@ const App = () => {
   }
 
   const removePerson = (id) => () => {
-    peopleService.remove(id);
-    setPeople(people.filter(person => person.id !== id))
+    const personToDelete = people.find(person => person.id === id);
+    if(window.confirm(`Delete ${personToDelete.name}?`)){
+      peopleService.remove(id);
+      setPeople(people.filter(person => person.id !== id))
+    }
   }
 
   const handlePersonChange = (event) => {
