@@ -34,6 +34,9 @@ const App = () => {
     else{
       setPersons(persons.concat(personObject))
       setNewName('')
+      axios
+        .post('http://localhost:3001/persons', personObject)
+        .then(response => console.log(response.data))
     }
   }
 
