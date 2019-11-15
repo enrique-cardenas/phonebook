@@ -27,10 +27,23 @@ const App = () => {
     const personObject = {
       name: newName,
       number: newNumber,
-      id: people.length - 1
+      id: people.length + 1
     }
-    if(people.findIndex(person => person.name === newName) !== -1){
-      alert(`${newName} is already added to phonebook`)
+
+    if(people.find(person => person.name === newName)){
+
+      const name = personObject.name
+
+      if(window.confirm(`${name} is already in the phonebook, would you like to replace the old number with a new one?`)){
+        const indexOfPersonToChange = people.findIndex(person => person.name === name)
+        const changedPerson = {...people[indexOfPersonToChange], number: newNumber}
+        const updatedPeople = [...people]
+        updatedPeople[indexOfPersonToChange].number = newNumber
+        peopleService
+          .update(changedPerson)
+          .then(response => setPeople(updatedPeople))
+      }
+      
     }
     else{
       peopleService
