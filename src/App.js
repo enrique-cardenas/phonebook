@@ -11,8 +11,8 @@ const App = () => {
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
-  const [notificationMessage, setNotificationMessage] = useState(null)
-  const [notificationType, setNotificationType] = useState(null)
+  const [ notificationMessage, setNotificationMessage] = useState(null)
+  const [ notificationType, setNotificationType] = useState(null)
 
   useEffect(() => {
     peopleService
@@ -44,10 +44,17 @@ const App = () => {
         updatedPeople[indexOfPersonToChange].number = newNumber
         peopleService
           .update(changedPerson)
-          .then(response => setPeople(updatedPeople))
+          .then(response => {
+            setPeople(updatedPeople)
+            setNotificationMessage(`Updated ${personObject.name}`)
+            setNotificationType("update")
+          })
+          .catch(error => {
+            setNotificationMessage(`Information on ${personObject.name} has already been removed from server`)
+            setNotificationType("error")
+          })
       }
-      setNotificationMessage(`Updated ${newName}`)
-      setNotificationType("update")
+
       setTimeout(() => {
         setNotificationMessage(null)
       }, 5000)
