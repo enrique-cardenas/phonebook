@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
-import People from './components/People'
-import peopleService from './services/people' 
+import Persons from './components/Persons'
+import personsService from './services/persons' 
 import Notification from './components/Notification'
 
 const App = () => {
 
-  const [ people, setPeople] = useState([])
+  const [ persons, setPersons ] = useState([])
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
@@ -15,14 +15,14 @@ const App = () => {
   const [ notificationType, setNotificationType] = useState(null)
 
   useEffect(() => {
-    peopleService
+    personsService
       .getAll()
-      .then(initialPeople => {
-        setPeople(initialPeople)
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
-  const peopleToShow = people.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+  const personsToShow = persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
   
   const addPerson = (event) => {
     event.preventDefault()
@@ -30,22 +30,22 @@ const App = () => {
     const personObject = {
       name: newName,
       number: newNumber,
-      id: people.length + 1
+      id: persons.length + 1
     }
 
-    if(people.find(person => person.name === newName)){
+    if(persons.find(person => person.name === newName)){
 
       const name = personObject.name
 
       if(window.confirm(`${name} is already in the phonebook, would you like to replace the old number with a new one?`)){
-        const indexOfPersonToChange = people.findIndex(person => person.name === name)
-        const changedPerson = {...people[indexOfPersonToChange], number: newNumber}
-        const updatedPeople = [...people]
-        updatedPeople[indexOfPersonToChange].number = newNumber
-        peopleService
+        const indexOfPersonToChange = persons.findIndex(person => person.name === name)
+        const changedPerson = {...persons[indexOfPersonToChange], number: newNumber}
+        const updatedPersons = [...persons]
+        updatedPersons[indexOfPersonToChange].number = newNumber
+        personsService
           .update(changedPerson)
           .then(response => {
-            setPeople(updatedPeople)
+            setPersons(updatedPersons)
             setNotificationMessage(`Updated ${personObject.name}`)
             setNotificationType("update")
           })
@@ -60,25 +60,33 @@ const App = () => {
       }, 5000)
     }
     else{
-      peopleService
+      personsService
         .create(personObject)
         .then(data => {
-          setPeople(people.concat(personObject))
+          setPersons(persons.concat(personObject))
           setNewName('')
+          setNotificationMessage(`Added ${newName}`)
+          setNotificationType("add")
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
         })
-        setNotificationMessage(`Added ${newName}`)
-        setNotificationType("add")
-        setTimeout(() => {
-          setNotificationMessage(null)
-        }, 5000)
+        .catch(error => {
+          setNewName('')
+          setNotificationMessage(`${error.response.data.errror}`)
+          setNotificationType('error')
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+        })
     }
   }
 
   const removePerson = (id) => () => {
-    const personToDelete = people.find(person => person.id === id);
+    const personToDelete = persons.find(person => person.id === id);
     if(window.confirm(`Delete ${personToDelete.name}?`)){
-      peopleService.remove(id);
-      setPeople(people.filter(person => person.id !== id))
+      personsService.remove(id);
+      setPersons(persons.filter(person => person.id !== id))
     }
   }
 
@@ -104,7 +112,7 @@ const App = () => {
       <h2>add a new</h2>
       <PersonForm addPerson={addPerson} newName={newName} handlePersonChange={handlePersonChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <People peopleToShow={peopleToShow} removePerson={removePerson}/>
+      <Persons personsToShow={personsToShow} removePerson={removePerson}/>
     </div>
   )
 }
